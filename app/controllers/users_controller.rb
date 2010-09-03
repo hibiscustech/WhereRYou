@@ -3,15 +3,16 @@ class UsersController < ApplicationController
   def register_user
     user = User.new(:username => params[:username], :password => params[:password], :email => params[:email], :name => params[:name])
     if user.save!
-      friends = [ { :name => "anil", :longitude => "77.583333", :latitude => "12.98333", :time => "10" },
-                 { :name => "kumar", :longitude => "-76.21667", :latitude => "12.21667", :time => "44.95" } ]
+#      friends = [ { :name => "anil", :longitude => "77.583333", :latitude => "12.98333", :time => "10" },
+#                 { :name => "kumar", :longitude => "-76.21667", :latitude => "12.21667", :time => "44.95" } ]
+#
+#      xml_output = buildxml_friends_list(friends)
 
-      xml_output = buildxml_friends_list(friends)
-
-      render :xml => xml_output
+      render :text => "true"
     end
+    render :text => "false"
   end
-
+  
   def check_user
     user = User.check_user(params[:username], params[:password])
 
