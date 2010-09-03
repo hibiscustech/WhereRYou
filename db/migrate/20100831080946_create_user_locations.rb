@@ -7,7 +7,7 @@ class CreateUserLocations < ActiveRecord::Migration
                 `current_long` varchar(45) NOT NULL,
                 `current_time` int(11) unsigned NOT NULL,
                 PRIMARY KEY  (`id`),
-                KEY `friend_id` (`user_id`),
+                KEY `user_id` (`user_id`),
                 CONSTRAINT `FK_user_locations_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
                 ) ENGINE=InnoDB }
 
