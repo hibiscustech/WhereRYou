@@ -1,6 +1,7 @@
 class User < ActiveRecord::Base
   has_many :user_friends
   has_many :user_locations
+  has_many :user_invitations
 
   attr_reader :password
 
@@ -19,5 +20,13 @@ class User < ActiveRecord::Base
 
     return user
   end
+#
+#    def self.request(user_id,email,status)
+#      user = User.find(:first,  :conditions => {:email => email})
+#
+#      return user
+#    end
+
+  
 
 end
