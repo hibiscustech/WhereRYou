@@ -9,12 +9,13 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100901011028) do
+ActiveRecord::Schema.define(:version => 20100904020015) do
 
   create_table "user_friends", :force => true do |t|
     t.integer "user_id",                                 :null => false
     t.integer "friend_id"
     t.string  "share",     :limit => 0, :default => "0"
+    t.string  "view",      :limit => 0, :default => "1"
   end
 
   add_index "user_friends", ["friend_id"], :name => "friend_id"
@@ -24,6 +25,7 @@ ActiveRecord::Schema.define(:version => 20100901011028) do
     t.integer "user_id",                                      :null => false
     t.string  "email",   :limit => 45
     t.string  "status",  :limit => 0,  :default => "pending"
+    t.string  "kind",    :limit => 0
   end
 
   add_index "user_invitations", ["user_id"], :name => "user_id"
