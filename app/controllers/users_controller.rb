@@ -61,18 +61,18 @@ class UsersController < ApplicationController
     end
 
     if !params[:view].blank?
-      if params[:share].to_s == "1"
+      if params[:view].to_s == "1"
         user_friend1 = UserFriend.find_by_sql("select * from user_friends where user_id=#{params[:user_id]} and friend_id=#{params[:friend_id]}")[0]
         user_friend2 = UserFriend.find_by_sql("select * from user_friends where user_id=#{params[:friend_id]} and friend_id=#{params[:user_id]}")[0]
         if user_friend1.blank?
-          user_friend1 = UserFriend.new(:user_id => params[:user_id], :friend_id => params[:friend_id], :share => params[:share])
+          user_friend1 = UserFriend.new(:user_id => params[:user_id], :friend_id => params[:friend_id], :view => params[:view])
         else
-          user_friend1.share = params[:share]
+          user_friend1.share = params[:view]
         end
         if user_friend2.blank?
-          user_friend2 = UserFriend.new(:user_id => params[:friend_id], :friend_id => params[:user_id], :share => params[:share])
+          user_friend2 = UserFriend.new(:user_id => params[:friend_id], :friend_id => params[:user_id], :view => params[:view])
         else
-          user_friend2.share = params[:share]
+          user_friend2.share = params[:view]
         end
         if user_friend1.save && user_friend2.save
           invitation.update_attributes(:status => "accept")
