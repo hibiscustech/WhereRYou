@@ -32,7 +32,7 @@ class UsersController < ApplicationController
 
   def process_invitation
     user = User.find(params[:user_id])
-    invitation = UserInvitation.find_by_sql("select * from user_invitations where user_id=#{params[:friend_id]} and email=#{user.email}")[0]
+    invitation = UserInvitation.find_by_sql("select * from user_invitations where user_id=#{params[:friend_id]} and email='#{user.email}'")[0]
 
     if !params[:share].blank?
       if params[:share].to_s == "1"
