@@ -31,20 +31,21 @@ class UsersController < ApplicationController
   end
 
   def process_invitation
-    user = User.find(params[:user_id])
-    invitation = UserInvitation.find_by_sql("select * from user_invitations where user_id=#{params[:friend_id]} and email='#{user.email}'")[0]
+   user = User.find_by_sql("select * from users where username ='#{params[:user]}'")[0]
+   friend = User.find_by_sql("select * from users where username ='#{params[:friend]}'")[0]
+   invitation = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}'")[0]
 
     if !params[:share].blank?
       if params[:share].to_s == "1"
-        user_friend1 = UserFriend.find_by_sql("select * from user_friends where user_id=#{params[:user_id]} and friend_id=#{params[:friend_id]}")[0]
-        user_friend2 = UserFriend.find_by_sql("select * from user_friends where user_id=#{params[:friend_id]} and friend_id=#{params[:user_id]}")[0]
+        user_friend1 = UserFriend.find_by_sql("select * from user_friends where user_id=#{user.id} and friend_id=#{friend.id}")[0]
+        user_friend2 = UserFriend.find_by_sql("select * from user_friends where user_id=#{friend.id} and friend_id=#{user.id}")[0]
         if user_friend1.blank?
-          user_friend1 = UserFriend.new(:user_id => params[:user_id], :friend_id => params[:friend_id], :share => params[:share])
+          user_friend1 = UserFriend.new(:user_id => user.id, :friend_id => friend.id, :share => params[:share])
         else
           user_friend1.share = params[:share]
         end
         if user_friend2.blank?
-          user_friend2 = UserFriend.new(:user_id => params[:friend_id], :friend_id => params[:user_id], :share => params[:share])
+          user_friend2 = UserFriend.new(:user_id => friend.id, :friend_id => user.id, :share => params[:share])
         else
           user_friend2.share = params[:share]
         end
@@ -57,40 +58,40 @@ class UsersController < ApplicationController
       else
         invitation.update_attributes(:status => "reject")
         render :text => "true"
-      end
-    end
 
-    if !params[:view].blank?
-      if params[:view].to_s == "1"
-        user_friend1 = UserFriend.find_by_sql("select * from user_friends where user_id=#{params[:user_id]} and friend_id=#{params[:friend_id]}")[0]
-        user_friend2 = UserFriend.find_by_sql("select * from user_friends where user_id=#{params[:friend_id]} and friend_id=#{params[:user_id]}")[0]
-        if user_friend1.blank?
-          user_friend1 = UserFriend.new(:user_id => params[:user_id], :friend_id => params[:friend_id], :view => params[:view])
+       end
+
+        elsif params[:share].to_s == "2"
+          user_friend1 = UserFriend.find_by_sql("select * from user_friends where user_id=#{user.id} and friend_id=#{friend.id}")[0]
+          user_friend2 = UserFriend.find_by_sql("select * from user_friends where user_id=#{friend.id} and friend_id=#{user.id}")[0]
+          if user_friend1.blank?
+            user_friend1 = UserFriend.new(:user_id => user.id, :friend_id => friend.id, :share => params[:share])
+          else
+            user_friend1.share = params[:share]
+          end
+          if user_friend2.blank?
+            user_friend2 = UserFriend.new(:user_id => friend.id, :friend_id => user.id, :share => params[:share])
+          else
+            user_friend2.share = params[:share]
+          end
+          if user_friend1.save && user_friend2.save
+            invitation.update_attributes(:status => "accept")
+            render :text => "true"
+          else
+            render :text => "false"
+          end
         else
-          user_friend1.share = params[:view]
-        end
-        if user_friend2.blank?
-          user_friend2 = UserFriend.new(:user_id => params[:friend_id], :friend_id => params[:user_id], :view => params[:view])
-        else
-          user_friend2.share = params[:view]
-        end
-        if user_friend1.save && user_friend2.save
-          invitation.update_attributes(:status => "accept")
+          invitation.update_attributes(:status => "reject")
           render :text => "true"
-        else
-          render :text => "false"
-        end
-      else
-        invitation.update_attributes(:status => "reject")
-        render :text => "true"
-      end
-    end
-    
-  end 
+
+     end
+   end 
 
   def share_friend
     if !params[:share].blank?
-      user_friend = UserFriend.find_by_sql("select * from user_friends where user_id=#{params[:user_id]} and friend_id=#{params[:friend_id]}")[0]
+      user = User.find_by_sql("select * from users where username ='#{params[:user]}'")[0]
+      friend = User.find_by_sql("select * from users where username ='#{params[:friend]}'")[0]
+      user_friend = UserFriend.find_by_sql("select * from user_friends where user_id=#{user.id} and friend_id=#{friend.id}")[0]
       if !user_friend.blank?
         user_friend.update_attributes(:share => params[:share])
         render :text => "true"
