@@ -88,11 +88,11 @@ class UsersController < ApplicationController
     
   end 
 
-  def following_friend
+  def share_friend
     if !params[:share].blank?
       user_friend = UserFriend.find_by_sql("select * from user_friends where user_id=#{params[:user_id]} and friend_id=#{params[:friend_id]}")[0]
       if !user_friend.blank?
-        user_friend.share = params[:share]
+        user_friend.update_attributes(:share => params[:share])
         render :text => "true"
       else
         render :text => "false"
