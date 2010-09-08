@@ -2,24 +2,11 @@ class UsersController < ApplicationController
 
 
   def register_user
-#    user1 = User.check_user(params[:username],params[:password])
-    error = ""
     user = User.new(:username => params[:username], :password => params[:password], :email => params[:email], :name => params[:name])
-    if user.save!
+    if user.save
       render :text => "your account is created"
     else
-      if !user.errors[:username].blank?
-        error = "Username "+user.errors[:username][0]
-        render :string => error
-      end
-      if !user.errors[:email].blank?
-        error = "Email "+user.errors[:email][0]
-        render :string => error
-      end
-      if !user.errors[:password].blank?
-        error = "password "+user.errors[:password]
-        render :string => error
-      end
+      render :xml => user.errors
     end
   end
   
@@ -75,11 +62,8 @@ class UsersController < ApplicationController
    user = User.find_by_sql("select * from users where username ='#{params[:user]}'")[0]
    friend = User.find_by_sql("select * from users where username ='#{params[:friend]}'")[0]
    invitation = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}'")[0]
-#   parser = XML::SaxParser.file("E:/projects/WhereRYou/tmp/status.xml")
-#   parser.parse
-    xml_status = File.read('E:/projects/WhereRYou/tmp/status.xml')
-    
 
+    
     if !params[:share].blank?
       if params[:share].to_s == "1"
         user_friend1 = UserFriend.find_by_sql("select * from user_friends where user_id=#{user.id} and friend_id=#{friend.id}")[0]
@@ -88,23 +72,25 @@ class UsersController < ApplicationController
           user_friend1 = UserFriend.new(:user_id => user.id, :friend_id => friend.id, :share => params[:share])
         else
           user_friend1.share = params[:share]
+          user_friend1.deleted = 'no'
         end
         if user_friend2.blank?
           user_friend2 = UserFriend.new(:user_id => friend.id, :friend_id => user.id, :share => params[:share])
         else
           user_friend2.share = params[:share]
+          user_friend2.deleted = 'no'
         end
         if user_friend1.save && user_friend2.save
           invitation.update_attributes(:status => "accept")
-          render :xml => xml_status
+          render :text => "friend request accepted"
         else
           render :text => "false"
         end
-      else
-        invitation.update_attributes(:status => "reject")
-        render :text => "true"
-
-       end
+#      else
+#        invitation.update_attributes(:status => "reject")
+#        render :text => "friend request rejected"
+#
+#       end
 
         elsif params[:share].to_s == "2"
           user_friend1 = UserFriend.find_by_sql("select * from user_friends where user_id=#{user.id} and friend_id=#{friend.id}")[0]
@@ -113,22 +99,24 @@ class UsersController < ApplicationController
             user_friend1 = UserFriend.new(:user_id => user.id, :friend_id => friend.id, :share => params[:share])
           else
             user_friend1.share = params[:share]
+            user_friend1.deleted = 'no'
           end
           if user_friend2.blank?
             user_friend2 = UserFriend.new(:user_id => friend.id, :friend_id => user.id, :share => params[:share])
           else
             user_friend2.share = params[:share]
+            user_friend2.deleted = 'no'
           end
           if user_friend1.save && user_friend2.save
             invitation.update_attributes(:status => "accept")
-            render :text => "true"
+            render :text => "friend request accepted"
           else
             render :text => "false"
           end
         else
           invitation.update_attributes(:status => "reject")
-          render :text => "true"
-
+          render :text => "friend request rejected"
+      end
      end
    end 
 
@@ -155,19 +143,13 @@ class UsersController < ApplicationController
     delete_user2 = UserFriend.find_by_sql("select * from user_friends where  user_id=#{friend.id} and friend_id=#{user.id}")[0]
      if !delete_user1.blank? && !delete_user2.blank?
         delete_user1.update_attributes(:deleted => "yes")
-        render :text => "true"
+        delete_user2.update_attributes(:deleted => "yes")
+        render :text => "friend deleted"
       else
-        render :text => "false"
+        render :text => "not deleted"
       end
-#
-#     if !delete_user2.blank? && delete_user2.save
-#       delete_user2.update_attributes(:deleted => "yes")
-#       render :text => "true"
-#      else
-#       render :text => "false"
-#      end
-# 
   end
+
 
 
   private
