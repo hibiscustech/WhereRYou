@@ -2,11 +2,11 @@ class UsersController < ApplicationController
 
 
   def register_user
-    user = User.new(:username => params[:username], :password => params[:password], :email => params[:email], :name => params[:name])
-    if user.save
+    @user = User.new(:username => params[:username], :password => params[:password], :email => params[:email], :name => params[:name])
+    if @user.save
       render :text => "your account is created"
     else
-      render :xml => user.errors
+      render :action => 'error'
     end
   end
   
@@ -86,11 +86,7 @@ class UsersController < ApplicationController
         else
           render :text => "false"
         end
-#      else
-#        invitation.update_attributes(:status => "reject")
-#        render :text => "friend request rejected"
-#
-#       end
+
 
         elsif params[:share].to_s == "2"
           user_friend1 = UserFriend.find_by_sql("select * from user_friends where user_id=#{user.id} and friend_id=#{friend.id}")[0]
