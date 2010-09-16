@@ -5,12 +5,12 @@ class User < ActiveRecord::Base
 
 #  validates_presence_of     :username
   validates_length_of       :username,    :within => 3..20
-  validates_uniqueness_of   :username
+  validates_uniqueness_of   :username,    :message => "Duplicate Username"
 
   #validates_presence_of     :email
  # validates_length_of       :email,    :within => 6..100
-  validates_uniqueness_of   :email
-  #validates_format_of      :email
+  validates_uniqueness_of   :email,       :message => "Duplicate Email"
+  validates_format_of       :email,       :with => /\A([\w\.%\+\-]+)@((?:[A-Z0-9\-]+\.)+)(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|jobs|museum)\z/i, :message => "Invalid Email"
 
  # validates_length_of       :password,    :within => 4..40
 
