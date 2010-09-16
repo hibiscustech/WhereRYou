@@ -9,13 +9,13 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100907193101) do
+ActiveRecord::Schema.define(:version => 20100915200639) do
 
   create_table "user_friends", :force => true do |t|
     t.integer "user_id",                                  :null => false
     t.integer "friend_id"
     t.string  "share",     :limit => 0, :default => "0"
-    t.string  "view",      :limit => 0, :default => "1"
+    t.string  "view",      :limit => 0, :default => "0"
     t.string  "deleted",   :limit => 0, :default => "no", :null => false
   end
 
