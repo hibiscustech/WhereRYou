@@ -92,13 +92,18 @@ class UsersController < ApplicationController
    user = User.find_by_sql("select * from users where username ='#{params[:user]}'")[0]
    friend = User.find_by_sql("select * from users where username ='#{params[:friend]}'")[0]
    if !friend.blank?
+     deleted_friend = UserFriend.find_by_sql("select * from user_friends where user_id =#{user.id} and deleted = 'yes' ")
      invitation = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{user.id} and email ='#{friend.email}' and kind = '#{params[:kind]}' and status = 'pending'")[0]
      invitation1 = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{user.id} and email ='#{friend.email}' and kind = '#{params[:kind]}' and status = 'accept'")[0]
      if params[:kind].to_s == "share"
+       friend_requested = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'view' and status = 'pending'")[0]
        invitation2 = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'view' and status = 'accept'")[0]
      elsif params[:kind].to_s == "view"
+       friend_requested = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'share' and status = 'pending'")[0]
        invitation2 = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'share' and status = 'accept'")[0]
      end
+     
+      if friend_requested.blank?
 
       if invitation.blank?
         if invitation1.blank?&&invitation2.blank?
@@ -112,11 +117,21 @@ class UsersController < ApplicationController
          else
           render :text => "You can't send request to yourself FOOL"
          end
-       else
-         render :text => "You are already friend with "+friend.username
+       elsif !deleted_friend.blank?
+          invite = UserInvitation.new(:user_id => user.id, :email => friend.email,:kind => params[:kind])
+          if invite.save!
+           render :text => "Request sent successfully"
+          else
+           render :text => "Request not sent"
+          end
+        else
+          render :text => "You are already friend with "+friend.username
        end
       else
         render :text => "Friend requested already"
+      end
+      else
+        render :text => friend.username+" has requested you already"
       end
 
      else
@@ -131,36 +146,51 @@ class UsersController < ApplicationController
    user = User.find_by_sql("select * from users where username ='#{params[:user]}'")[0]
    friend = User.find_by_sql("select * from users where email = '#{params[:email]}'")[0]
    if !friend.blank?
-   invitation = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{user.id} and email ='#{friend.email}' and kind = '#{params[:kind]}' and status = 'pending'")[0]
-   invitation1 = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{user.id} and email ='#{friend.email}' and kind = '#{params[:kind]}' and status = 'accept'")[0]
-   if params[:kind].to_s == "share"
-     invitation2 = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'view' and status = 'accept'")[0]
-   elsif params[:kind].to_s == "view"
-     invitation2 = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'share' and status = 'accept'")[0]
-   end
-
-    if invitation.blank?
-      if invitation1.blank?&&invitation2.blank?
-       if user!=friend
-        invite = UserInvitation.new(:user_id => user.id, :email => friend.email,:kind => params[:kind])
-        if invite.save!
-         render :text => "Request sent successfully"
-        else
-         render :text => "Request not sent"
-        end
-       else
-        render :text => "You can't send request to yourself FOOL"
-       end
-     else
-       render :text => "You are already friend with "+friend.name
+     deleted_friend = UserFriend.find_by_sql("select * from user_friends where user_id =#{user.id} and deleted = 'yes' ")
+     invitation = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{user.id} and email ='#{friend.email}' and kind = '#{params[:kind]}' and status = 'pending'")[0]
+     invitation1 = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{user.id} and email ='#{friend.email}' and kind = '#{params[:kind]}' and status = 'accept'")[0]
+     if params[:kind].to_s == "share"
+       friend_requested = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'view' and status = 'pending'")[0]
+       invitation2 = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'view' and status = 'accept'")[0]
+     elsif params[:kind].to_s == "view"
+       friend_requested = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'share' and status = 'pending'")[0]
+       invitation2 = UserInvitation.find_by_sql("select * from user_invitations where user_id =#{friend.id} and email ='#{user.email}' and kind = 'share' and status = 'accept'")[0]
      end
-    else
-      render :text => "Friend requested already"
-    end
 
-   else
-    render :text => "frnd doesnt exists"
-   end
+      if friend_requested.blank?
+
+      if invitation.blank?
+        if invitation1.blank?&&invitation2.blank?
+         if user!=friend
+          invite = UserInvitation.new(:user_id => user.id, :email => friend.email,:kind => params[:kind])
+          if invite.save!
+           render :text => "Request sent successfully"
+          else
+           render :text => "Request not sent"
+          end
+         else
+          render :text => "You can't send request to yourself FOOL"
+         end
+       elsif !deleted_friend.blank?
+          invite = UserInvitation.new(:user_id => user.id, :email => friend.email,:kind => params[:kind])
+          if invite.save!
+           render :text => "Request sent successfully"
+          else
+           render :text => "Request not sent"
+          end
+        else
+          render :text => "You are already friend with "+friend.username
+       end
+      else
+        render :text => "Friend requested already"
+      end
+      else
+        render :text => friend.username+" has requested you already"
+      end
+
+     else
+      render :text => "frnd doesnt exists"
+    end
   end
 
 
@@ -335,8 +365,8 @@ class UsersController < ApplicationController
   def update_location
      user = User.find_by_sql("select * from users where username ='#{params[:user]}'")[0]
      if !user.blank?
-       user_location = UserLocation.new(:user_id => user.id, :current_lat => params[:latitude], :current_long => params[:longitude], :current_time => params[:time].to_time.to_i)
-       user.update_attributes(:current_lat =>params[:latitude], :current_long => params[:longitude], :current_time => params[:time].to_time.to_i)
+       user_location = UserLocation.new(:user_id => user.id, :current_lat => params[:latitude], :current_long => params[:longitude], :current_time => Time.parse(params[:time]).to_i)
+       user.update_attributes(:current_lat =>params[:latitude], :current_long => params[:longitude], :current_time => Time.parse(params[:time]).to_i)
        if user_location.save
          render :text => "location updated"
        else
@@ -352,18 +382,35 @@ class UsersController < ApplicationController
 
 
 #*************************************************************************************************************************************************************************
-  def buildxml_user_friends_list(list, user_id)
+ def buildxml_user_friends_list(list, user_id)
     doc = Builder::XmlMarkup.new( :target => out_string = "", :indent => 2 )
     doc.list {
       list.each{ |element_data|
         doc.root{
           i_am_friend = UserFriend.find_by_sql("select * from user_friends where user_id='#{element_data[:id]}' and friend_id='#{user_id}'")[0]
           friend_share = (i_am_friend.blank?)? 0 : i_am_friend.share.to_s
-          new_time = Time.at(element_data[:current_time] ).to_datetime
-          doc.username( element_data[:username] )
+          now_time = Time.now.to_i
+          last_updated = now_time - element_data[:current_time]
+          doc.name( element_data[:username] )
           doc.longitude( element_data[:current_lat] )
           doc.latitude( element_data[:current_long] )
-          doc.time( new_time )
+          if last_updated<60
+            doc.time( last_updated.to_s+" secs" )
+          elsif last_updated<3600
+            doc.time( (last_updated/60).to_s+" mins" )
+          elsif last_updated<7200
+            doc.time( (last_updated/3600).to_s+" hour" )
+          elsif last_updated<86400
+            doc.time( (last_updated/3600).to_s+" hours" )
+          elsif last_updated<172800
+            doc.time( (last_updated/86400).to_s+" day" )
+          elsif last_updated<2592000
+            doc.time( (last_updated/86400).to_s+" days" )
+          elsif last_updated<31104000
+            doc.time( (last_updated/2592000).to_s+" month" )
+          else
+            doc.time( (last_updated/31104000).to_s+" year" )
+          end
           doc.share(friend_share)
         }
       }
