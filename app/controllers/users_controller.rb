@@ -348,8 +348,8 @@ class UsersController < ApplicationController
     delete_user1 = UserFriend.find_by_sql("select * from user_friends where  user_id=#{user.id} and friend_id=#{friend.id}")[0]
     delete_user2 = UserFriend.find_by_sql("select * from user_friends where  user_id=#{friend.id} and friend_id=#{user.id}")[0]
      if !delete_user1.blank? && !delete_user2.blank?
-        delete_user1.update_attributes(:deleted => "yes",:share => '0', :view => '0')
-        delete_user2.update_attributes(:deleted => "yes",:share => '0', :view => '0')
+        delete_user1.update_attributes(:share => '0')
+        delete_user2.update_attributes(:view => '0')
        
         render :text => "friend deleted"
       else
